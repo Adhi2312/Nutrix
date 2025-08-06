@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import './Personal.css';
 const PersonalInfoPage = () => {

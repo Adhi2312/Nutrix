@@ -1,19 +1,22 @@
+
 .container {
   display: flex;
   justify-content: center;
-  height: 100vh;
+  min-height:100vh;
   background-color: #fff;
+  padding: auto;
 }
 
 .content-container {
   background-color: #ffff;
-  padding: 32px;
+  padding: 2 rem;
   border-radius: 8px;
   width: 100%;
-  min-width:200px;
-  max-width: 400px;
+  /* min-width:200px; */
+  max-width: 50 rem;
   height:300px;
   margin-top:100px;
+  position: relative;
 }
 
 .title {
@@ -23,9 +26,11 @@
 }
 
 .form-container {
-  display: flex;
-  height:39vh;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* height:39vh;
+  flex-direction: column; */
+  gap: 1.5rem;
 }
 
 .form-group {

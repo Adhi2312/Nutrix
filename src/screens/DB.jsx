@@ -5,316 +5,239 @@ import foot from '../imges/runer-silhouette-running-fast.png';
 import GaugeChart from 'react-gauge-chart';
 import hrt from '../imges/heartbeat.gif';
 import { authenticateFitbit, fetchFitbitActivities } from './Connect';
-import { LineChart ,Gauge} from '@mui/x-charts';
+import { LineChart, Gauge } from '@mui/x-charts';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// import { Gauge } from 'react-circular-gauge'
-import chroma from 'chroma-js'
-const DB = ({data}) => {
-  const [heartRate, setHeartRate] = useState(75);
-  const [activities, setActivities] = useState(null); 
-  const [date, setDate] = useState("");
-  const nav=useNavigate();
-  
-  
-  const res=async()=>{
-    try{const res=await fetch('http://localhost:4000/authorize',{
-      method: 'GET',
-      credentials: 'include',
-      headers: {'Content-Type': 'application/json',
-          },
-        }
-        );
-        console.log(res.status);
-      if (res.status==404)nav('/login');}
-      
-        catch(error){console.log(error)}
-    
-  }
-  
-   const ok=res();
+import PersonalDetails from './PersonalDetails';
 
+const DB = ({ data }) => {
+  const [activities, setActivities] = useState(null);
+  const nav = useNavigate();
+
+  // Effect to handle initial authorization check
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/authorize', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (res.status === 404) {
+          nav('/login');
+        }
+      } catch (error) {
+        console.error("Authorization check failed:", error);
+        nav('/login');
+      }
+    };
+    checkAuth();
+  }, [nav]);
+
+  // Effect to fetch Fitbit activities
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await fetchFitbitActivities(date);
-        console.log("kat",data);
-        setActivities(data); // Update activities with the fetched data
+        const fitbitData = await fetchFitbitActivities();
+        console.log("Fetched Fitbit data:", fitbitData);
+        setActivities(fitbitData);
+        console.log("activities fetched :",activities);
       } catch (error) {
         console.error("Error fetching activities:", error);
       }
     };
 
-    fetchData();
-
-    const interval = setInterval(() => {
-      console.log("Fetching Fitbit activities...");
-      fetchData();
-    }, 30 * 60 * 10); 
+    fetchData(); // Initial fetch
+    const interval = setInterval(fetchData, 30 * 60 * 1000); // Corrected interval to 30 minutes
 
     return () => clearInterval(interval);
-  }, [date]);
+  }, []);
+  console.log("Activities state has been updated:", activities);
+
+  useEffect(() => {
+    if (activities) {
+        
+        // You can also verify specific values here
+        console.log("Steps from updated state:", activities.result.dailySummary.steps);
+    }
+}, [activities]);
 
   const handleConnectFitbit = () => {
     authenticateFitbit();
   };
 
-
-return (
+  // Safely access Fitbit data from the state
+  const caloriesBurned = activities?.result?.dailySummary?.caloriesBurned || 0;
+  const steps = activities?.result?.dailySummary?.steps || 0;
+  const heartRate = activities?.result?.heartRateData?.length > 0 ? activities.result.heartRateData[0].bpm : 'N/A';
+  const calorieGoal = activities?.result?.dailySummary?.activityGoals?.caloriesOut || 2500;
+  const caloriePercent = (caloriesBurned / calorieGoal).toFixed(2);
+  const bmiPercent = (data?.weight && data?.height) ? (data.weight / ((data.height / 100) * (data.height / 100))) / 30 * 100 : 0;
+    
+  return (
     <div className='DB-main'>
-      <div style={{display:"flex",width:"100%",alignItems:"flex-start"}}>
+      <div style={{ display: "flex", width: "100%", alignItems: "flex-start", justifyContent: "space-between" }}>
         <h1> Hello , Prithiv Raj</h1>
+        <button onClick={handleConnectFitbit} className='connect-fitbit-btn'>
+          Connect Fitbit
+        </button>
       </div>
       <div className='one'>
-          <div className='one-1'>
-            
-            <div className='one-1-sub'>
-                    <h3>Calorie</h3>
-                    <div className='one-1-chart'>
-                        <div className='gauge'>
-                            <GaugeComponent data={data}/>
-                        </div>
-                        <div className='gauge-info'>
-                        <SubComponent  text={'Calorie Gained'} color={'#f1fdf5'} tc={'#2b9e56'} data={data} />
-                        <SubComponent text={"Calorie burnt"} color={'#eef7ff'} tc={'#2b64d9'}/>
-                        </div>
-                    </div>
+        <div className='one-1'>
+          <div className='one-1-sub'>
+            <h3>Calorie</h3>
+            <div className='one-1-chart'>
+              <div className='gauge'>
+                <GaugeComponent value={data?.Calorie || 0} />
+              </div>
+              <div className='gauge-info'>
+                <SubComponent text={'Calorie Gained'} color={'#f1fdf5'} tc={'#2b9e56'} value={data?.Calorie || 0} />
+                <SubComponent text={"Calorie burnt"} color={'#eef7ff'} tc={'#2b64d9'} value={caloriesBurned} />
+              </div>
             </div>
-             
-             
-             
-
-           
-           
           </div>
+        </div>
 
-          <div className='one-2'>
-          <div style={{height:"8%",marginTop:'-10px',width:"100%",marginLeft:"10px",marginBottom:"10px"}}>
-              <h3>Macros</h3>
-              </div>
-              <div className='one-gauge'>
-                <div style={{height:"100%"}}>
-                <Gauge width={150} height={150} value={data?.Protein}  sx={{
-        '& .MuiGauge-valueArc': {
-          fill: '#00274D', // Value arc color
-        },
-        '& .MuiGauge-referenceArc': {
-          fill: '#d3d3d3', // Reference arc color
-        },
-        '& .MuiGauge-valueLabel': {
-          fill: '#74b8', // Value text color
-          fontSize: '24px', // Optional font size customization
-        },
-      }} />
-                <p>Protein</p>
-                </div>
-                <div style={{height:"100%"}}>
-                <Gauge width={150} height={150} value={data?.Carbs} 
+        <div className='one-2'>
+          <div style={{ height: "8%", marginTop: '-10px', width: "100%", marginLeft: "10px", marginBottom: "10px" }}>
+            <h3>Macros</h3>
+          </div>
+          <div className='one-gauge'>
+            <div style={{ height: "100%" }}>
+              <Gauge width={150} height={150} value={data?.Protein || 0} sx={{
+                '& .MuiGauge-valueArc': { fill: '#00274D' },
+                '& .MuiGauge-referenceArc': { fill: '#d3d3d3' },
+                '& .MuiGauge-valueLabel': { fill: '#74b8', fontSize: '24px' },
+              }} />
+              <p>Protein</p>
+            </div>
+            <div style={{ height: "100%" }}>
+              <Gauge width={150} height={150} value={data?.Carbs || 0}
                 maxValue={3000}
-                
                 sx={{
-                  '& .MuiGauge-valueArc': {
-                    fill: '#72C2E8', // Value arc color
-                  },
-                  '& .MuiGauge-referenceArc': {
-                    fill: '#d3d3d3', // Reference arc color
-                  },
-                  '& .MuiGauge-valueLabel': {
-                    fill: '#74b8', // Value text color
-                    fontSize: '24px', // Optional font size customization
-                  },
+                  '& .MuiGauge-valueArc': { fill: '#72C2E8' },
+                  '& .MuiGauge-referenceArc': { fill: '#d3d3d3' },
+                  '& .MuiGauge-valueLabel': { fill: '#74b8', fontSize: '24px' },
                 }}
-                />
-                <p>Carbs</p>
-                </div>
-                <div style={{height:"100%"}}>
-                <Gauge width={150} height={150} value={data?.Fat} 
-                
+              />
+              <p>Carbs</p>
+            </div>
+            <div style={{ height: "100%" }}>
+              <Gauge width={150} height={150} value={data?.Fat || 0}
                 sx={{
-                  '& .MuiGauge-valueArc': {
-                    fill: '#556B2F', // Value arc color
-                  },
-                  '& .MuiGauge-referenceArc': {
-                    fill: '#d3d3d3', // Reference arc color
-                  },
-                  '& .MuiGauge-valueLabel': {
-                    fill: '#74b8', // Value text color
-                    fontSize: '24px', // Optional font size customization
-                  },
-                }} 
-                />
-                <p>Fats</p>
-                </div>
-                  {/* <Linechart/> */}
-                  
-              </div>
+                  '& .MuiGauge-valueArc': { fill: '#556B2F' },
+                  '& .MuiGauge-referenceArc': { fill: '#d3d3d3' },
+                  '& .MuiGauge-valueLabel': { fill: '#74b8', fontSize: '24px' },
+                }}
+              />
+              <p>Fats</p>
+            </div>
           </div>
+        </div>
 
-          <div className='one-3'>
-          
+        <div className='one-3'>
           <h3>BMI</h3>
-          {/* <GaugeChart id="gauge-chart1" percent={0.6} />
-           */}
-<GaugeChart id="gauge-chart5"
-  nrOfLevels={3}
-  // arcsLength={[0.5, 0.5, 0.5]}
-  colors={['#5BE12C', '#F5CD19', '#EA4228']}
-  percent={0.4}
-  arcPadding={0.02}
-/>
-          </div>
+          <GaugeChart id="gauge-chart5"
+            nrOfLevels={3}
+            colors={['#5BE12C', '#F5CD19', '#EA4228']}
+            percent={bmiPercent} // Updated to use a calculated BMI percentage
+            arcPadding={0.02}
+          />
+        </div>
       </div>
 
       <div className='two'>
         <div className='two-1'>
-            <div className='two-1-1'>
-            <img style={{height:"60px",width:"60px"}} src={hrt}/>
-              <p>Heart Rate</p>
-              {/* <h3></h3> */}
-            {/* <img style={{marginTop:"20px", marginLeft: "135px", height: "50px", width: "50px" }} src={heartbeatImage} alt="Heartbeat" />
-            <h3 style={{marginLeft:"115px"}}>Heart Rate</h3>  {/* Display mock heart rate */}
-            <h3 style={{}}>{heartRate} bpm</h3>  
-            </div>
-            <div className='two-1-2'>
-              {/* <h3>Step Count</h3> */}
-              
-              
-              <img style={{height:"60px",width:"60px"}} src={foot}/>
-              <p>Steps</p>
-              <h3>300 m</h3>
-              
-            
-              
-
-            </div>
+          <div className='two-1-1'>
+            <img style={{ height: "60px", width: "60px" }} src={hrt} alt="Heart Rate" />
+            <p>Heart Rate</p>
+            <h3>{heartRate} bpm</h3>
+          </div>
+          <div className='two-1-2'>
+            <img style={{ height: "60px", width: "60px" }} src={foot} alt="Steps" />
+            <p>Steps</p>
+            <h3>{steps} m</h3>
+          </div>
         </div>
         <div className='two-2'>
-              <div style={{height:"10%",width:"100%",marginLeft:"10px"}}>
-              <h3>Caloric Balance: Intake vs Burn Rate</h3>
-              </div>
-              <div style={{height:"80%",width:"100%",marginTop:"-15px"}}>
-                  <Linechart/>
-              </div>
-              
-              {/* <LineChart/> */}
+          <div style={{ height: "10%", width: "100%", marginLeft: "10px" }}>
+            <h3>Caloric Balance: Intake vs Burn Rate</h3>
+          </div>
+          <div style={{ height: "80%", width: "100%", marginTop: "-15px" }}>
+            <Linechart />
+          </div>
         </div>
-        <div className='two-3'>
-
-        </div>
-
+        <PersonalDetails userData={data} />
       </div>
-
     </div>
-  )
-}
-const Linechart=()=>{
-  // const data = [
-  //   ["Year", "Sales", "Expenses"],
-  //   ["2004", 1000, 400],
-  //   ["2005", 1170, 460],
-  //   ["2006", 660, 1120],
-  //   ["2007", 1030, 540],
-  // ];
-    // title: "Company Performance",
-    const [data,setData]=useState(null);
-    const res=async()=>{
-      console.log("hey yheh.");
-      try
-      {
-        const response = await axios.get('http://localhost:4000/getCalH');
-        console.log("Response data:", response.data);
-      }
-      catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    // try{const res=await fetch('http://localhost:4000/authorize',{
-    //   method: 'GET',
-    //   credentials: 'include',
-    //   headers: {'Content-Type': 'application/json',
-    //       },
-    //     }
-    //     );
-    //     console.log(res.status);
-    //   if (res.status==404)nav('/signup/personal');
-    // }
-      
-    //     catch(error){console.log(error)}
-    
-  }
-  
-   const ok=res();
-    
-    
-
-  
-  const options = {
-    // title: "Company Performance",
-    curveType: "function",
-    legend: { position: "bottom" },
-  };
-  // <GaugeChart id="gauge-chart1" percent={0.5} />
-  return (
-    // <div>
-    <LineChart
-  xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
-  series={[
-    {
-      data: [2, 5.5, 2, 8.5, 1.5, 5],
-      color: "#ff5a5a",
-    
-    }
-    ,
-    {
-      data: [3, 7, 8 , 5, 5, 1],
-      color:'#8f8f',
-    
-    }
-  ]}
-  width={600}
-  height={350}
-/>
-    // </div>
   );
-}
+};
 
-export default DB
-// const chartStyle = {
-// ��height:�250,
-// }
+const Linechart = () => {
+  const [chartData, setChartData] = useState([]);
+  const [calorieBurnedData, setCalorieBurnedData] = useState([]);
 
-const SubComponent=({text,color,tc,data})=>{
-  return(
-    <div className='info-sub' style={{backgroundColor:color}}>
-      <p>
-        {text}
-      </p>
-      <p style={{fontWeight:'bold' ,color:tc}}>{(text=='Calorie Gained')?data?.Calorie:1000}</p>
+  useEffect(() => {
+    const fetchCalorieHistory = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/getCalH', {
+          withCredentials: true,
+        });
+        const calorieIn = response.data.map(item => item.calorie_in);
+        const calorieBurned = response.data.map(item => item.calorie_burnt);
+        setChartData(calorieIn);
+        setCalorieBurnedData(calorieBurned);
+      } catch (error) {
+        console.error("Error fetching calorie history:", error);
+      }
+    };
+    fetchCalorieHistory();
+  }, []);
+
+  return (
+    <LineChart
+      xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
+      series={[
+        {
+          data: chartData,
+          color: "#ff5a5a",
+          label: "Calories Gained"
+        },
+        {
+          data: calorieBurnedData.length > 0 ? calorieBurnedData : [3, 7, 8, 5, 5, 1],
+          color: '#8f8f',
+          label: "Calories Burned"
+        }
+      ]}
+      width={600}
+      height={350}
+    />
+  );
+};
+
+const SubComponent = ({ text, color, tc, value }) => {
+  return (
+    <div className='info-sub' style={{ backgroundColor: color }}>
+      <p>{text}</p>
+      <p style={{ fontWeight: 'bold', color: tc }}>{value}</p>
     </div>
-  )
-}
-const GaugeComponent=({data})=>{
-  return(
-    
+  );
+};
 
-
+const GaugeComponent = ({ value }) => {
+  return (
     <Gauge
-    width={150}
-    height={150}
-    value={data?.Carbs}
-    max={300} // 👈 Set your custom maximum value here
-    sx={{
-      '& .MuiGauge-valueArc': {
-        fill: '#72C2E8',
-      },
-      '& .MuiGauge-referenceArc': {
-        fill: '#d3d3d3',
-      },
-      '& .MuiGauge-valueLabel': {
-        fill: '#74b8',
-        fontSize: '24px',
-      },
-    }}
-  />
+      width={150}
+      height={150}
+      value={value}
+      max={300}
+      sx={{
+        '& .MuiGauge-valueArc': { fill: '#72C2E8' },
+        '& .MuiGauge-referenceArc': { fill: '#d3d3d3' },
+        '& .MuiGauge-valueLabel': { fill: '#74b8', fontSize: '24px' },
+      }}
+    />
+  );
+};
 
-  )
-}
+export default DB;
