@@ -1,0 +1,415 @@
+.DB-main {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    flex-grow: 1;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+/* ---------------- TOP ROW ---------------- */
+
+.one {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 20px;
+}
+
+.one-1,
+.one-2,
+.one-3 {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* ---------------- BOTTOM ROW ---------------- */
+
+.two {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 20px;
+    align-items: stretch;
+}
+
+/* ---------------- LEFT COLUMN ---------------- */
+
+.two-1 {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+}
+
+.two-1-1,
+.two-1-2 {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    box-sizing: border-box;
+}
+
+.two-1-1 img,
+.two-1-2 img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.two-1-1 p,
+.two-1-2 p {
+    margin: 5px 0;
+}
+
+.two-1-1 h3,
+.two-1-2 h3 {
+    margin: 0;
+}
+
+/* ---------------- GRAPH ---------------- */
+
+.two-2 {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.graph-header {
+    margin-bottom: 20px;
+}
+
+.graph-body {
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ---------------- PERSONAL DETAILS ---------------- */
+
+.two-3{
+    background:#fff;
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    box-sizing:border-box;
+    /* height:100%; */
+}
+
+.personal-details-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.header-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.header-title h3{
+    margin:0;
+    font-size:18px;
+    font-weight:600;
+}
+
+.user-icon,
+.eye-icon{
+    width:18px;
+    height:18px;
+}
+
+.personal-details-content{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.field-label{
+    font-size:14px;
+    font-weight:600;
+    color:#555;
+    margin-bottom:4px;
+}
+
+.field-value{
+    margin:0;
+    font-size:16px;
+    font-weight:500;
+}
+
+.name-value{
+    font-size:18px;
+    font-weight:700;
+}
+
+.bmi-container{
+    background:#f7f8fc;
+    border-radius:12px;
+    padding:14px;
+}
+
+.bmi-display{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.bmi-value{
+    font-size:24px;
+    font-weight:700;
+}
+
+.bmi-category{
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:20px;
+    color:#fff;
+    font-weight:600;
+}
+
+/* BMI */
+
+.bmi-container {
+    margin-top: 8px;
+    background: #f6f7fb;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.bmi-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bmi-value {
+    font-size: 38px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.bmi-category {
+    color: white;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ---------------- CALORIE CARD ---------------- */
+
+.one-1-sub {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.one-1-chart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+}
+
+.gauge {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gauge-info {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-sub {
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.info-sub p {
+    margin: 4px 0;
+}
+
+/* ---------------- MACROS ---------------- */
+
+.one-2 {
+    display: flex;
+    flex-direction: column;
+}
+
+.one-gauge {
+    flex: 1;
+
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.one-gauge > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.one-gauge p {
+    margin-top: 10px;
+}
+
+/* ---------------- BMI ---------------- */
+
+.one-3 {
+    display: flex;
+    flex-direction: column;
+}
+
+.one-3 h3 {
+    margin-bottom: 10px;
+}
+
+/* ---------------- COMMON ---------------- */
+
+h1 {
+    margin: 0;
+    font-family: satoshi;
+    font-weight: 600;
+}
+
+h3 {
+    margin: 0;
+    font-family: satoshi;
+    font-weight: 600;
+}
+
+/* ---------------- BUTTON ---------------- */
+
+.connect-fitbit-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.connect-fitbit-btn:hover {
+    background: #0056b3;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width:1200px){
+
+    .one,
+    .two{
+        grid-template-columns:1fr;
+    }
+
+    .two-1{
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:none;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .two-1{
+        grid-template-columns:1fr;
+    }
+
+    .one-gauge{
+        flex-direction:column;
+        gap:20px;
+    }
+
+    .one-1-chart{
+        flex-direction:column;
+        gap:20px;
+    }
+
+}
+
+.dashboard-wrapper{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+}
+
+.dashboard.blur{
+    filter:blur(6px);
+    pointer-events:none;
+    user-select:none;
+}
+
+.fitbit-overlay{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:999;
+}
+
+.fitbit-card{
+
+    width:420px;
+    padding:35px;
+
+    background:white;
+    border-radius:18px;
+
+    text-align:center;
+
+    box-shadow:0 10px 40px rgba(0,0,0,.2);
+}
+
+.fitbit-card h2{
+    margin-bottom:15px;
+}
+
+.fitbit-card p{
+    color:#666;
+    line-height:1.6;
+    margin-bottom:25px;
+}
+
+.connect-fitbit-btn{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:14px 28px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:600;
+}

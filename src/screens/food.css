@@ -1,0 +1,110 @@
+.food-sub
+{
+    /* background-color: rgb(255, 255, 255); */
+    /* height: 100vh; */
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    width: 70%;
+
+    /* padding: 0px 20px 0px 20px; */
+}
+.in
+{
+    width: 97%;
+    /* margin-left: auto;
+    margin-right: auto; */
+    padding: 15px 10px;
+    font-size: medium;
+    border-radius: 13px;
+    outline: none;
+    border: none;
+    width: 95%;
+
+}
+input:focus
+{
+    border: none;
+}
+.food-card
+{
+    /* padding: 10px; */
+    border-radius: 20px 20px 20px 20px;
+    /* width: auto; */
+    max-width: 300px;
+    background-color:#ffffff;
+}
+
+.food-sub-2
+{
+    padding: 30px 0px;
+    display: flex;
+    gap: 35px;
+    flex-wrap: wrap;
+}
+.search
+{
+    /* padding: 20px; */
+    background-color: #ffffff;
+    padding: 9px;
+    margin-left: 10px;
+    border-radius: 12px;
+}
+.food-card2
+{
+
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    top :50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    border-radius: 15px;
+    /* min-height: 400px; */
+    min-width: 350px;
+    background-color: rgb(255, 255, 255);
+    /* box-shadow: 10px 10px 10px grey;
+     */
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 
+     0 1px 3px rgba(0, 0, 0, 0.08);
+     transition: box-shadow 0.3s ease-in-out;
+    /* flex-direction: row;
+   
+    margin-top: auto;
+    margin-bottom: auto;
+
+    justify-content: center; */
+    /* align-items: center; */
+    /* margin-top: auto;margin-bottom: auto; */
+    
+}
+/* .food-card2:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 
+                0 2px 4px rgba(0, 0, 0, 0.12);
+  } */
+.ccc>p{
+    margin: 10px;
+}
+.add-b
+{
+    display: flex;
+    margin: 10px;
+    border: 1px solid rgb(190, 190, 190);
+    border-radius: 3px;
+}
+.add-b>button
+
+{
+    /* padding: 3px 4px;
+     */
+     border: 0px;
+}
+.add-b>p{
+    margin: 0px 10px;
+}
+h1{
+    font-weight: 700;
+    font-size: 24;
+}

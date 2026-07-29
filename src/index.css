@@ -1,0 +1,76 @@
+body {
+  margin: 0;
+  
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ff5a5a;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+h1{
+  margin: 0px;
+}
+.sub-main
+{
+  /* padding: 20px; */
+  /* background-color: black; */
+  /* min-height: 86%; */
+ 
+}
+.main
+{
+  display: flex;
+  flex-direction: column;
+  /* background-color: bisque; */
+  height: 100vh;
+  background-color: #e5e5e5;
+  /* padding: auto; */
+
+}
+.nav
+{
+  display: flex;
+  padding: 20px 70px;
+  background-color:red;
+  justify-content: flex-start; 
+  position: fixed;
+  bottom: 0;
+  margin:10px;
+  gap: 50px;
+  margin-top: 190px;
+  border-radius: 20px;
+  left: 50%;          /* Position the div's left edge in the center of the page */
+  transform: translateX(-50%); 
+
+}
+
+.nav-button {
+  background: none;
+  color: black;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* .nav-button:hover {
+  color: #ddd;
+} */
+
+/* .nav-button svg {
+  margin-right: 5px;
+} */
+/* .nav-prof
+{
+  
+  width: 100%;
+  
+} */
