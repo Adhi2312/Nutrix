@@ -1,4 +1,4 @@
-import { calculateMaintenanceCalories, calculateMacroGoals } from './nutrition';
+import { calculateAge, calculateMaintenanceCalories, calculateMacroGoals } from './nutrition';
 
 describe('nutrition utilities', () => {
   it('calculates maintenance calories for a male using Mifflin-St Jeor', () => {
@@ -7,6 +7,16 @@ describe('nutrition utilities', () => {
 
   it('calculates maintenance calories for a female using Mifflin-St Jeor', () => {
     expect(calculateMaintenanceCalories(65, 160, 30, 'female')).toBe(2075);
+  });
+
+  it('treats the stored false gender value as female', () => {
+    expect(calculateMaintenanceCalories(65, 160, 30, false)).toBe(2075);
+  });
+
+  it('calculates age from a date of birth', () => {
+    const today = new Date();
+    const birthDate = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate());
+    expect(calculateAge(birthDate.toISOString())).toBe(30);
   });
 
   it('returns rounded macro goals from maintenance calories and body weight', () => {
