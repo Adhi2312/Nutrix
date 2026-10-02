@@ -1,10 +1,11 @@
 # 🏃‍♂️ Fitness Tracker Web Application
 
-A full-stack fitness tracking application that integrates with **Fitbit API** to monitor health metrics like steps, heart rate, sleep, and calories. Users can securely view and manage their fitness data with a responsive and clean interface.
+A full-stack fitness tracking application that integrates with **Google Health API** to monitor health metrics from Fitbit, Pixel Watch, and Health Connect. Users can also track daily calories and macros from a seeded food catalog.
 
 ## 🚀 Features
 - 🔐 **Authentication** with JWT
-- 📊 Real-time health data via **Fitbit API**
+- 📊 Health data via **Google Health API**
+- 🍽️ Daily calorie and macro tracking
 - ✏️ Editable user profiles with conditional rendering
 - 🌐 RESTful API for backend services
 - 💾 MongoDB for persistent data storage
@@ -33,6 +34,7 @@ A full-stack fitness tracking application that integrates with **Fitbit API** to
 git clone https://github.com/Prithivraj22/fitness-tracker-backend
 cd fitness-tracker-backend
 npm install
+npm run seed:foods
 npm start
 ```
 
@@ -43,6 +45,9 @@ cd FITNESS_TRACKER
 npm install
 npm start
 ```
+
+Copy each repository's `.env.example` file to `.env` first. Configure the
+backend `MONGO_URI`, then run the food seed before starting both applications.
 
 ## 🤝 Contributors
 - [@Prithivraj22](https://github.com/Prithivraj22)
