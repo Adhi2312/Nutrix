@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { apiUrl } from '../api';
+
+const localDate = () => {
+  const now = new Date();
+  return [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+    .map((value, index) => String(value).padStart(index === 0 ? 4 : 2, '0'))
+    .join('-');
+};
 
 const ProfileForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [mobileno, setMobileno] = useState("");
-  const [age, setAge] = useState("");
+  const [dob, setDob] = useState("");
   const [bloodGroup, setBloodGroup] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -16,20 +24,20 @@ const ProfileForm = () => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const res = await fetch("http://localhost:4000/user-data", {
+        const res = await fetch(apiUrl(`/user-data?date=${localDate()}`), {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to load profile");
         const data = await res.json();
-        setUsername(data.username || "");
+        setDisplayName(data.displayName || data.username || "");
         setEmail(data.email || "");
         setMobileno(data.mobileno || "");
-        setAge(data.age || "");
+        setDob(data.dob ? String(data.dob).slice(0, 10) : "");
         setBloodGroup(data.bloodGroup || "");
         setHeight(data.height || "");
         setWeight(data.weight || "");
       } catch (err) {
-        console.error("Error loading profile:", err);
+        console.error("Profile request failed.");
         setError("Could not load your profile. Try refreshing.");
       } finally {
         setLoading(false);
@@ -45,16 +53,16 @@ const ProfileForm = () => {
   const handleSaveChanges = async () => {
     try {
       const updatedData = {
-        username,
+        displayName,
         email,
         mobileno,
-        age,
+        dob,
         bloodGroup,
         height,
         weight,
       };
 
-      const response = await fetch("http://localhost:4000/update_profile", {
+      const response = await fetch(apiUrl('/update_profile'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -65,10 +73,11 @@ const ProfileForm = () => {
         setIsEditing(false);
         setError(null);
       } else {
-        setError("Save failed. Please try again.");
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || "Save failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error saving changes:", error);
+      console.error("Profile update request failed.");
       setError("Save failed. Please try again.");
     }
   };
@@ -217,13 +226,13 @@ const ProfileForm = () => {
       <div style={styles.profileFormWrapper}>
         <div style={styles.profileForm}>
           <div style={styles.row}>
-            {renderField("username", "Username", username, setUsername)}
+            {renderField("displayName", "Name", displayName, setDisplayName)}
             {renderField("email", "Email Address", email, setEmail, "email")}
           </div>
 
           <div style={styles.row}>
             {renderField("mobileno", "Phone Number", mobileno, setMobileno, "tel")}
-            {renderField("age", "Age", age, setAge, "number")}
+            {renderField("dob", "Date of Birth", dob, setDob, "date")}
           </div>
 
           <div style={styles.row}>

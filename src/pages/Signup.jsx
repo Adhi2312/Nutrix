@@ -4,6 +4,8 @@ import { SignupStepper } from '../components/SignupStepper';
 import { AccountStep } from '../components/AccountStep';
 import { ProfileStep } from '../components/ProfileStep';
 import './Signup.css';
+import { apiUrl } from '../api';
+import { useQueryClient } from '@tanstack/react-query';
 
 const initialFormData = {
   firstName: '',
@@ -22,6 +24,7 @@ const initialFormData = {
 
 export const Signup = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState('');
@@ -52,17 +55,27 @@ export const Signup = () => {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
     setError('');
     setStep(2);
   };
 
   const handleFinishSignup = async (event) => {
     event.preventDefault();
+
+    if (!formData.gender || !formData.dob || !formData.height || !formData.weight) {
+      setError('Gender, date of birth, height, and weight are required.');
+      return;
+    }
     setIsSubmitting(true);
 
     try {
       const body = {
-        username: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
+        displayName: `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim(),
         email: formData.email,
         password: formData.password,
         gender: formData.gender === 'male' ? true : false,
@@ -73,20 +86,23 @@ export const Signup = () => {
         bloodGroup: formData.bloodGroup,
       };
 
-      const response = await fetch('http://localhost:4000/signup', {
+      const response = await fetch(apiUrl('/signup'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
-      if (response.status === 200) {
+      if (response.ok) {
+        queryClient.setQueryData(['session'], true);
+        await queryClient.invalidateQueries({ queryKey: ['user-data'] });
         navigate('/dashboard');
       } else {
-        setError('Signup could not be completed. Please try again.');
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || 'Signup could not be completed. Please try again.');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Signup request failed.');
       setError('Signup could not be completed. Please try again.');
     } finally {
       setIsSubmitting(false);

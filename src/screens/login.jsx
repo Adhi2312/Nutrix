@@ -1,23 +1,42 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiUrl } from '../api';
 
 export const Login = () => {
-  const [username, setUsername] = React.useState('');
+  const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
   const nav = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError('');
     try {
-      const res = await fetch('http://localhost:4000/login', {
+      const res = await fetch(apiUrl('/login'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
-      if (res.status === 200) nav('/');
+      if (!res.ok) {
+        const message = await res.text();
+        setError(message || 'Invalid username or password.');
+        return;
+      }
+      queryClient.setQueryData(['session'], true);
+      await queryClient.invalidateQueries({ queryKey: ['user-data'] });
+      const destination = location.state?.from?.pathname || '/dashboard';
+      nav(destination, { replace: true });
     } catch (error) {
-      console.error(error);
+      console.error('Login request failed.');
+      setError('Login is unavailable right now. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -31,12 +50,15 @@ export const Login = () => {
         </div>
 
         <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
+          {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
           <label className='flex flex-col gap-2 text-sm font-medium text-slate-700'>
-            <span>Username</span>
+            <span>Email</span>
             <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder='Enter username'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type='email'
+              autoComplete='email'
+              placeholder='Enter your email'
               className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white'
             />
           </label>
@@ -47,12 +69,15 @@ export const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type='password'
+              autoComplete='current-password'
               placeholder='Enter password'
               className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white'
             />
           </label>
 
-          <button type='submit' className='mt-2 rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700'>Login</button>
+          <button disabled={submitting} type='submit' className='mt-2 rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700'>
+            {submitting ? 'Logging in...' : 'Login'}
+          </button>
         </form>
 
         <div className='mt-6 text-center text-sm text-slate-600'>

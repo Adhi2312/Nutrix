@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Eye, EyeOff } from 'lucide-react';
 import { calculateBMI, getBMICategory } from '../utils/bmi';
+import { calculateAge } from '../utils/nutrition';
 
 const PersonalDetails = ({ userData }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -8,16 +9,14 @@ const PersonalDetails = ({ userData }) => {
   // No fake fallback person here on purpose — showing "Prithiv Raj, 24,
   // Male" for every user regardless of who's logged in is worse than
   // showing a loading/placeholder state.
-  const name = userData?.username;
-  const age = userData?.age;
+  const name = userData?.displayName || userData?.username;
+  const age = calculateAge(userData?.dob);
   const height = userData?.height;
   const weight = userData?.weight;
-  // Schema stores gender as a Boolean (0/false = Male, 1/true = Female,
-  // matching the signup form). Mapping it to a label here rather than in
-  // multiple places.
+  // The current database uses true for male and false for female.
   const gender = userData?.gender === undefined || userData?.gender === null
     ? undefined
-    : (userData.gender ? 'Female' : 'Male');
+    : (userData.gender ? 'Male' : 'Female');
 
   const bmi = calculateBMI(height, weight);
   const bmiInfo = getBMICategory(bmi);

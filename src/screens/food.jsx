@@ -6,23 +6,32 @@ import { CiSearch } from "react-icons/ci";
 import { FaPlus } from "react-icons/fa6";
 import { FiMinus } from "react-icons/fi";
 import { RxCross1 } from "react-icons/rx";
+import { apiUrl } from '../api';
+
+const localDate = () => {
+  const now = new Date();
+  return [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+    .map((value, index) => String(value).padStart(index === 0 ? 4 : 2, '0'))
+    .join('-');
+};
 
 export const Food = () => {
   const [selectedDish, setSelectedDish] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadFoods = async () => {
       try {
-        const res = await fetch('http://localhost:4000/foods', {
-          credentials: 'include',
-        });
-        const data = await res.json();
-        setDishes(Array.isArray(data) ? data : []);
+        const foodsResponse = await fetch(apiUrl('/foods'), { credentials: 'include' });
+        if (!foodsResponse.ok) throw new Error('Unable to load nutrition data');
+        const foodsData = await foodsResponse.json();
+        setDishes(Array.isArray(foodsData) ? foodsData : []);
       } catch (err) {
-        console.error('Error loading foods:', err);
+        console.error('Food request failed.');
+        setError('Could not load foods. Try refreshing.');
       } finally {
         setLoading(false);
       }
@@ -34,10 +43,19 @@ export const Food = () => {
     d.dish_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleNutritionAdded = () => {
+    setSelectedDish(null);
+    window.dispatchEvent(new Event('nutrition-updated'));
+  };
+
   return (
     <div>
       {selectedDish && (
-        <Card dish={selectedDish} onClose={() => setSelectedDish(null)} />
+        <Card
+          dish={selectedDish}
+          onClose={() => setSelectedDish(null)}
+          onAdded={handleNutritionAdded}
+        />
       )}
 
       <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center" }}>
@@ -53,11 +71,13 @@ export const Food = () => {
           </div>
 
           <div className='food-sub-2'>
+            {error && <p style={{ padding: '12px 20px', color: '#b91c1c' }}>{error}</p>}
+
             {loading && <p style={{ padding: '20px' }}>Loading dishes...</p>}
 
             {!loading && filteredDishes.length === 0 && (
               <p style={{ padding: '20px' }}>
-                No dishes yet. Add some via the /meal API so they show up here.
+                No dishes are available yet.
               </p>
             )}
 
@@ -73,7 +93,7 @@ export const Food = () => {
                     <div>
                       <p style={{ margin: "0px", fontSize: "20px" }}>{dish.dish_name}</p>
                       <p style={{ margin: "5px 0px 5px 0px", fontSize: "15px", color: "grey" }}>
-                        {dish.calorie} calories
+                        {dish.calorie} calories per {dish.servingDescription || 'serving'}
                       </p>
                     </div>
                     <IoIosAddCircleOutline
@@ -93,26 +113,30 @@ export const Food = () => {
   )
 }
 
-export const Card = ({ dish, onClose }) => {
+export const Card = ({ dish, onClose, onAdded }) => {
   const [count, setCount] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   const handle = async () => {
-    const body = {
-      calorie: dish.calorie * count,
-      protein: dish.protein * count,
-      fat: dish.fat * count,
-      carbs: dish.carbs * count,
-    };
+    const body = { foodId: dish._id, quantity: count, date: localDate() };
     try {
-      const res = await fetch('http://localhost:4000/update_macros', {
+      setSaving(true);
+      setError('');
+      const res = await fetch(apiUrl('/nutrition/intake'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      if (res.status === 200) onClose();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to update today\'s nutrition');
+      onAdded();
     } catch (error) {
-      console.error(error);
+      console.error('Macro update request failed.');
+      setError(error.message || 'Unable to update today\'s nutrition.');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -124,6 +148,7 @@ export const Card = ({ dish, onClose }) => {
       <div style={{ width: "100%", display: "flex", height: "100%", backgroundColor: "white" }}>
         <div className="ccc" style={{ display: 'flex', flexDirection: 'column', width: "50%" }}>
           <h3>Dish Name</h3>
+          <p>Serving</p>
           <p>Protein</p>
           <p>Carbs</p>
           <p>Fats</p>
@@ -138,6 +163,7 @@ export const Card = ({ dish, onClose }) => {
         </div>
         <div className='ccc' style={{ width: '50%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <h3>{dish.dish_name}</h3>
+          <p>{dish.servingDescription || '1 serving'}</p>
           <p>{dish.protein} g</p>
           <p>{dish.carbs} g</p>
           <p>{dish.fat} g</p>
@@ -149,10 +175,12 @@ export const Card = ({ dish, onClose }) => {
           </div>
           <button
             onClick={handle}
+            disabled={saving}
             style={{ minWidth: "100px", padding: '10px 30px', margin: "10px", borderRadius: "10px", border: '0px' }}
           >
-            Add
+            {saving ? 'Adding...' : 'Add'}
           </button>
+          {error && <p style={{ color: '#b91c1c', margin: '0 10px' }}>{error}</p>}
         </div>
       </div>
     </div>

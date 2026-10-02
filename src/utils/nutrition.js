@@ -1,16 +1,32 @@
+export const calculateAge = (dob) => {
+  if (!dob) return 0;
+
+  const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return 0;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayHasPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+  if (!birthdayHasPassed) age -= 1;
+  return age > 0 ? age : 0;
+};
+
 export const calculateMaintenanceCalories = (weight, height, age, gender) => {
   const normalizedWeight = Number(weight);
   const normalizedHeight = Number(height);
   const normalizedAge = Number(age);
-  const normalizedGender = String(gender || '').toLowerCase();
+  const isFemale = gender === false || String(gender).toLowerCase() === 'female';
 
-  if ([normalizedWeight, normalizedHeight, normalizedAge].some((value) => Number.isNaN(value))) {
+  if ([normalizedWeight, normalizedHeight, normalizedAge].some((value) => !Number.isFinite(value) || value <= 0)) {
     return 0;
   }
 
   let bmr = 0;
 
-  if (normalizedGender === 'female') {
+  if (isFemale) {
     bmr = 10 * normalizedWeight + 6.25 * normalizedHeight - 5 * normalizedAge - 161;
   } else {
     bmr = 10 * normalizedWeight + 6.25 * normalizedHeight - 5 * normalizedAge + 5;

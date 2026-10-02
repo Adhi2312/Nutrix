@@ -3,89 +3,84 @@ import './db.css';
 import foot from '../imges/runer-silhouette-running-fast.png';
 import GaugeChart from 'react-gauge-chart';
 import hrt from '../imges/heartbeat.gif';
-import { authenticateFitbit, fetchFitbitActivities } from './Connect';
+import { authenticateGoogleHealth, fetchHealthActivities, fetchHealthConnection } from './Connect';
 import { LineChart, Gauge } from '@mui/x-charts';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PersonalDetails from './PersonalDetails';
 import { calculateBMI, bmiToGaugePercent } from '../utils/bmi';
-import { calculateMaintenanceCalories, calculateMacroGoals } from '../utils/nutrition';
+import { calculateAge, calculateMaintenanceCalories, calculateMacroGoals } from '../utils/nutrition';
+import { apiUrl } from '../api';
+
+const localDate = () => {
+  const now = new Date();
+  return [now.getFullYear(), now.getMonth() + 1, now.getDate()]
+    .map((value, index) => String(value).padStart(index === 0 ? 4 : 2, '0'))
+    .join('-');
+};
 
 const DB = ({ data }) => {
 
   const [activities, setActivities] = useState(null);
-  const [loadingFitbit, setLoadingFitbit] = useState(true);
-const [fitbitConnected, setFitbitConnected] = useState(true);
-// const [activities, setActivities] = useState(null);
-  const nav = useNavigate();
-
-  // Effect to handle initial authorization check
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('http://localhost:4000/authorize', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!res.ok) {
-          nav('/login');
-        }
-      } catch (error) {
-        console.error("Authorization check failed:", error);
-        nav('/login');
-      }
-    };
-    checkAuth();
-  }, [nav]);
-
-  // Effect to fetch Fitbit activities
+  const [healthConnected, setHealthConnected] = useState(true);
+  const [healthUnavailable, setHealthUnavailable] = useState(false);
+  const [healthLoading, setHealthLoading] = useState(true);
+  const [migrationRequired, setMigrationRequired] = useState(false);
+  // Load the connected health provider, then fetch its activity data.
   useEffect(() => {
 
     const fetchData = async () => {
 
         try {
 
-            const data = await fetchFitbitActivities();
+            const connection = await fetchHealthConnection();
+            setHealthConnected(connection.connected);
+            setMigrationRequired(connection.migrationRequired);
+            if (!connection.connected) return;
+
+            const data = await fetchHealthActivities();
 
             setActivities(data);
-            setFitbitConnected(true);
+            window.dispatchEvent(new Event('calorie-history-updated'));
+            setHealthUnavailable(false);
 
         } catch (err) {
-
-            setFitbitConnected(false);
-
+            if (err.status === 401) {
+              setHealthConnected(false);
+              setHealthUnavailable(false);
+            } else {
+              setHealthUnavailable(true);
+            }
         } finally {
-
-            setLoadingFitbit(false);
+          setHealthLoading(false);
 
         }
-
     };
 
     fetchData();
 
 }, []);
 
-  const handleConnectFitbit = () => {
-    authenticateFitbit();
+  const handleConnectGoogleHealth = () => {
+    authenticateGoogleHealth();
   };
 
-  // Safely access Fitbit data from the state
+  // Safely access connected health data from the state
   const caloriesBurned = activities?.result?.dailySummary?.caloriesBurned || 0;
   const steps = activities?.result?.dailySummary?.steps || 0;
   const heartRate = activities?.result?.heartRateData?.length > 0 ? activities.result.heartRateData[0].bpm : 'N/A';
   const bmi = calculateBMI(data?.height, data?.weight);
   const bmiPercent = bmiToGaugePercent(bmi);
 
-  const maintenanceCalories = calculateMaintenanceCalories(data?.weight, data?.height, data?.age, data?.gender);
+  const profileAge = Number(data?.age) > 0 ? Number(data.age) : calculateAge(data?.dob);
+  const maintenanceCalories = calculateMaintenanceCalories(data?.weight, data?.height, profileAge, data?.gender);
+  const hasCalorieTarget = maintenanceCalories > 0;
   const macroGoals = calculateMacroGoals(data?.weight, maintenanceCalories);
   const consumedCalories = Number(data?.Calorie) || 0;
   const consumedProtein = Number(data?.Protein) || 0;
   const consumedCarbs = Number(data?.Carbs) || 0;
   const consumedFat = Number(data?.Fat) || 0;
 
-  const calorieGaugeValue = Math.min(consumedCalories, maintenanceCalories || consumedCalories);
+  const calorieGaugeValue = Math.min(consumedCalories, maintenanceCalories);
   const proteinGaugeValue = Math.min(consumedProtein, macroGoals.proteinGoal || consumedProtein);
   const carbsGaugeValue = Math.min(consumedCarbs, macroGoals.carbGoal || consumedCarbs);
   const fatGaugeValue = Math.min(consumedFat, macroGoals.fatGoal || consumedFat);
@@ -93,7 +88,7 @@ const [fitbitConnected, setFitbitConnected] = useState(true);
   return (
     <div className="dashboard-wrapper">
 
-    <div className={!fitbitConnected ? "dashboard blur" : "dashboard"}>
+    <div className={!healthConnected ? "dashboard blur" : "dashboard"}>
         {/* Entire existing dashboard goes here */}
         <div className='DB-main'>
       {/* <div style={{ display: "flex", width: "100%", alignItems: "flex-start", justifyContent: "space-between" }}>
@@ -106,11 +101,31 @@ const [fitbitConnected, setFitbitConnected] = useState(true);
             <h3>Calorie</h3>
             <div className='one-1-chart'>
               <div className='gauge'>
-                <GaugeComponent value={calorieGaugeValue} max={maintenanceCalories || consumedCalories} unit="kcal" />
+                <GaugeComponent value={calorieGaugeValue} max={maintenanceCalories} unit="kcal" />
               </div>
               <div className='gauge-info'>
-                <SubComponent text={'Calorie Gained'} color={'#f1fdf5'} tc={'#2b9e56'} value={`${consumedCalories} / ${maintenanceCalories || 0} kcal`} />
+                <SubComponent
+                  text={'Calorie Gained'}
+                  color={'#f1fdf5'}
+                  tc={'#2b9e56'}
+                  value={hasCalorieTarget ? `${consumedCalories} / ${maintenanceCalories} kcal` : `${consumedCalories} / -- kcal`}
+                />
+                {!hasCalorieTarget && (
+                  <p style={{ margin: '8px 0 0', color: '#6b7280', fontSize: '12px' }}>
+                    Add valid age, height, and weight to set your target.
+                  </p>
+                )}
                 <SubComponent text={"Calorie burnt"} color={'#eef7ff'} tc={'#2b64d9'} value={caloriesBurned} />
+                {healthUnavailable && (
+                  <div>
+                    <p style={{ margin: '8px 0 0', color: '#6b7280', fontSize: '12px' }}>
+                      Health data is temporarily unavailable.
+                    </p>
+                    <button type="button" className="connect-fitbit-btn" onClick={() => window.location.reload()}>
+                      Retry health connection
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -160,12 +175,12 @@ const [fitbitConnected, setFitbitConnected] = useState(true);
           <div className='two-1-2'>
             <img style={{ height: "60px", width: "60px" }} src={foot} alt="Steps" />
             <p>Steps</p>
-            <h3>{steps} m</h3>
+            <h3>{steps}</h3>
           </div>
         </div>
         <div className='two-2'>
           <div className="graph-header">
-    <h3>Caloric Balance: Intake vs Burn Rate</h3>
+    <h3>Daily Calorie History</h3>
 </div>
 
 <div className="graph-body">
@@ -178,22 +193,35 @@ const [fitbitConnected, setFitbitConnected] = useState(true);
     </div>
     </div>
 
-    {!fitbitConnected && (
+    {migrationRequired && healthConnected && (
+      <div className="fitbit-card" style={{ margin: '16px auto', maxWidth: '680px' }}>
+        <h2>Reconnect Fitbit through Google Health</h2>
+        <p>
+          Google is retiring the old Fitbit developer connection. Reconnect once to keep
+          steps, heart rate, and calories syncing from your Fitbit device.
+        </p>
+        <button className="connect-fitbit-btn" onClick={handleConnectGoogleHealth}>
+          Move connection to Google Health
+        </button>
+      </div>
+    )}
+
+    {!healthLoading && !healthConnected && (
         <div className="fitbit-overlay">
             <div className="fitbit-card">
-                <h2>Connect your Fitbit</h2>
+                <h2>Connect Google Health</h2>
 
                 <p>
-                    Connect your Fitbit account to view
+                    Connect Google Health to view Fitbit or Pixel Watch
                     heart rate, steps, calories burned and
                     other health insights.
                 </p>
 
                 <button
                     className="connect-fitbit-btn"
-                    onClick={handleConnectFitbit}
+                    onClick={handleConnectGoogleHealth}
                 >
-                    Connect Fitbit
+                    Connect Google Health
                 </button>
             </div>
         </div>
@@ -211,17 +239,19 @@ const Linechart = () => {
   useEffect(() => {
     const fetchCalorieHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/getCalH', {
+        const response = await axios.get(apiUrl(`/nutrition/history?date=${localDate()}`), {
           withCredentials: true,
         });
         setHistory(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
-        console.error("Error fetching calorie history:", error);
+        console.error("Calorie history request failed.");
       } finally {
         setLoading(false);
       }
     };
     fetchCalorieHistory();
+    window.addEventListener('calorie-history-updated', fetchCalorieHistory);
+    return () => window.removeEventListener('calorie-history-updated', fetchCalorieHistory);
   }, []);
 
   if (loading) {
@@ -231,7 +261,7 @@ const Linechart = () => {
   if (history.length === 0) {
     return (
       <p style={{ padding: '20px', color: '#6b7280' }}>
-        No calorie history yet — this fills in once a full day has passed.
+        No calorie history yet. Add food to start tracking today.
       </p>
     );
   }
@@ -240,7 +270,7 @@ const Linechart = () => {
     item.date ? new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''
   );
   const calorieIn = history.map(item => item.calorie_in ?? 0);
-  const calorieBurned = history.map(item => item.calorie_burnt ?? 0);
+  const calorieBurnt = history.map(item => item.calorie_burnt ?? 0);
 
   return (
     <LineChart
@@ -249,11 +279,11 @@ const Linechart = () => {
         {
           data: calorieIn,
           color: "#ff5a5a",
-          label: "Calories Gained"
+          label: "Calories Consumed"
         },
         {
-          data: calorieBurned,
-          color: '#22c55e',
+          data: calorieBurnt,
+          color: "#2b64d9",
           label: "Calories Burned"
         }
       ]}
@@ -276,8 +306,6 @@ const GaugeComponent = ({ value, max, unit }) => {
   const safeValue = Number(value) || 0;
   const safeMax = Number(max) || 0;
   const normalizedValue = safeMax > 0 ? Math.min(safeValue, safeMax) : safeValue;
-  const displayValue = safeMax > 0 ? `${Math.round(normalizedValue)}${unit ? ` ${unit}` : ''}` : `${Math.round(safeValue)}${unit ? ` ${unit}` : ''}`;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Gauge
