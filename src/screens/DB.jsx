@@ -18,13 +18,28 @@ const localDate = () => {
     .join('-');
 };
 
+const googleHealthErrorMessage = (status) => {
+  const messages = {
+    'api-access-denied': 'Google has not granted this Cloud project access to the Google Health API yet.',
+    'account-not-linked': 'This Google Account is not linked to a Google Health profile yet.',
+    'configuration-error': 'The Google Health connection is not configured correctly.',
+    'authorization-expired': 'The Google authorization expired before it could be completed.',
+    'connection-failed': 'Google Health could not complete the connection.',
+  };
+  return messages[status] || '';
+};
+
 const DB = ({ data }) => {
 
   const [activities, setActivities] = useState(null);
-  const [healthConnected, setHealthConnected] = useState(true);
+  const [healthConnected, setHealthConnected] = useState(null);
   const [healthUnavailable, setHealthUnavailable] = useState(false);
   const [healthLoading, setHealthLoading] = useState(true);
   const [migrationRequired, setMigrationRequired] = useState(false);
+  const [healthError, setHealthError] = useState(() => {
+    const status = new URLSearchParams(window.location.search).get('health');
+    return googleHealthErrorMessage(status);
+  });
   // Load the connected health provider, then fetch its activity data.
   useEffect(() => {
 
@@ -48,6 +63,7 @@ const DB = ({ data }) => {
               setHealthConnected(false);
               setHealthUnavailable(false);
             } else {
+              setHealthConnected(false);
               setHealthUnavailable(true);
             }
         } finally {
@@ -61,6 +77,7 @@ const DB = ({ data }) => {
 }, []);
 
   const handleConnectGoogleHealth = () => {
+    setHealthError('');
     authenticateGoogleHealth();
   };
 
@@ -88,7 +105,7 @@ const DB = ({ data }) => {
   return (
     <div className="dashboard-wrapper">
 
-    <div className={!healthConnected ? "dashboard blur" : "dashboard"}>
+    <div className={healthConnected === false ? "dashboard blur" : "dashboard"}>
         {/* Entire existing dashboard goes here */}
         <div className='DB-main'>
       {/* <div style={{ display: "flex", width: "100%", alignItems: "flex-start", justifyContent: "space-between" }}>
@@ -206,22 +223,22 @@ const DB = ({ data }) => {
       </div>
     )}
 
-    {!healthLoading && !healthConnected && (
+    {!healthLoading && healthConnected === false && (
         <div className="fitbit-overlay">
             <div className="fitbit-card">
-                <h2>Connect Google Health</h2>
+                <h2>{healthUnavailable ? 'Google Health is unavailable' : 'Connect Google Health'}</h2>
 
                 <p>
-                    Connect Google Health to view Fitbit or Pixel Watch
-                    heart rate, steps, calories burned and
-                    other health insights.
+                    {healthError || (healthUnavailable
+                      ? 'Nutrix could not check the Google Health connection. Please retry.'
+                      : 'Connect Google Health to view Fitbit or Pixel Watch heart rate, steps, calories burned and other health insights.')}
                 </p>
 
                 <button
                     className="connect-fitbit-btn"
-                    onClick={handleConnectGoogleHealth}
+                    onClick={healthUnavailable && !healthError ? () => window.location.reload() : handleConnectGoogleHealth}
                 >
-                    Connect Google Health
+                    {healthUnavailable && !healthError ? 'Retry health connection' : 'Connect Google Health'}
                 </button>
             </div>
         </div>
