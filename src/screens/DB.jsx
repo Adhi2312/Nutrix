@@ -52,11 +52,19 @@ const DB = ({ data }) => {
             setMigrationRequired(connection.migrationRequired);
             if (!connection.connected) return;
 
-            const data = await fetchHealthActivities();
-
-            setActivities(data);
-            window.dispatchEvent(new Event('calorie-history-updated'));
-            setHealthUnavailable(false);
+            try {
+              const data = await fetchHealthActivities();
+              setActivities(data);
+              window.dispatchEvent(new Event('calorie-history-updated'));
+              setHealthUnavailable(false);
+            } catch (err) {
+              if (err.status === 401) {
+                setHealthConnected(false);
+                setHealthUnavailable(false);
+              } else {
+                setHealthUnavailable(true);
+              }
+            }
 
         } catch (err) {
             if (err.status === 401) {
