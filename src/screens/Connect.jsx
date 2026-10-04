@@ -18,8 +18,13 @@ export const authenticateGoogleHealth = () => {
 };
 
 export const fetchHealthConnection = async () => {
-  const response = await api.get('/health/connection');
-  return response.data;
+  try {
+    const response = await api.get('/health/connection');
+    return response.data;
+  } catch (error) {
+    error.status = error.response?.status;
+    throw error;
+  }
 };
 
 export const fetchHealthActivities = async (date) => {
