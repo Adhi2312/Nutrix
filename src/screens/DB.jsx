@@ -116,10 +116,6 @@ const DB = ({ data }) => {
     <div className={healthConnected === false ? "dashboard blur" : "dashboard"}>
         {/* Entire existing dashboard goes here */}
         <div className='DB-main'>
-      {/* <div style={{ display: "flex", width: "100%", alignItems: "flex-start", justifyContent: "space-between" }}>
-        <h1> Hello , {data?.username || 'there'}</h1>
-        
-      </div> */}
       <div className='one'>
         <div className='one-1'>
           <div className='one-1-sub'>
@@ -131,16 +127,15 @@ const DB = ({ data }) => {
               <div className='gauge-info'>
                 <SubComponent
                   text={'Calorie Gained'}
-                  color={'#f1fdf5'}
-                  tc={'#2b9e56'}
+                  tone="success"
                   value={hasCalorieTarget ? `${consumedCalories} / ${maintenanceCalories} kcal` : `${consumedCalories} / -- kcal`}
                 />
                 {!hasCalorieTarget && (
-                  <p style={{ margin: '8px 0 0', color: '#6b7280', fontSize: '12px' }}>
+                  <p className="card-helper">
                     Add valid age, height, and weight to set your target.
                   </p>
                 )}
-                <SubComponent text={"Calorie burnt"} color={'#eef7ff'} tc={'#2b64d9'} value={caloriesBurned} />
+                <SubComponent text={"Calorie burnt"} tone="brand" value={`${caloriesBurned} kcal`} />
                 {healthUnavailable && (
                   <p className="health-data-status" role="status">
                     Health data is temporarily unavailable.
@@ -156,20 +151,20 @@ const DB = ({ data }) => {
     <h3>Macros</h3>
 </div>
           <div className='one-gauge'>
-            <div style={{ height: "100%" }}>
+            <div className="macro-item">
               <GaugeComponent value={proteinGaugeValue} max={macroGoals.proteinGoal || consumedProtein} unit="g" />
               <p>Protein</p>
-              <p style={{ marginTop: '6px', fontSize: '14px', color: '#4b5563' }}>{`${consumedProtein} / ${macroGoals.proteinGoal || 0} g`}</p>
+              <p className="macro-value">{`${consumedProtein} / ${macroGoals.proteinGoal || 0} g`}</p>
             </div>
-            <div style={{ height: "100%" }}>
+            <div className="macro-item">
               <GaugeComponent value={carbsGaugeValue} max={macroGoals.carbGoal || consumedCarbs} unit="g" />
               <p>Carbs</p>
-              <p style={{ marginTop: '6px', fontSize: '14px', color: '#4b5563' }}>{`${consumedCarbs} / ${macroGoals.carbGoal || 0} g`}</p>
+              <p className="macro-value">{`${consumedCarbs} / ${macroGoals.carbGoal || 0} g`}</p>
             </div>
-            <div style={{ height: "100%" }}>
+            <div className="macro-item">
               <GaugeComponent value={fatGaugeValue} max={macroGoals.fatGoal || consumedFat} unit="g" />
               <p>Fats</p>
-              <p style={{ marginTop: '6px', fontSize: '14px', color: '#4b5563' }}>{`${consumedFat} / ${macroGoals.fatGoal || 0} g`}</p>
+              <p className="macro-value">{`${consumedFat} / ${macroGoals.fatGoal || 0} g`}</p>
             </div>
           </div>
         </div>
@@ -188,12 +183,12 @@ const DB = ({ data }) => {
       <div className='two'>
         <div className='two-1'>
           <div className='two-1-1'>
-            <img style={{ height: "60px", width: "60px" }} src={hrt} alt="Heart Rate" />
+            <img className="metric-icon" src={hrt} alt="" />
             <p>Heart Rate</p>
             <h3>{heartRate} bpm</h3>
           </div>
           <div className='two-1-2'>
-            <img style={{ height: "60px", width: "60px" }} src={foot} alt="Steps" />
+            <img className="metric-icon" src={foot} alt="" />
             <p>Steps</p>
             <h3>{steps}</h3>
           </div>
@@ -214,7 +209,7 @@ const DB = ({ data }) => {
     </div>
 
     {migrationRequired && healthConnected && (
-      <div className="fitbit-card" style={{ margin: '16px auto', maxWidth: '680px' }}>
+      <div className="fitbit-card migration-card">
         <h2>Reconnect Fitbit through Google Health</h2>
         <p>
           Google is retiring the old Fitbit developer connection. Reconnect once to keep
@@ -275,12 +270,12 @@ const Linechart = () => {
   }, []);
 
   if (loading) {
-    return <p style={{ padding: '20px' }}>Loading history...</p>;
+    return <p className="chart-status">Loading history...</p>;
   }
 
   if (history.length === 0) {
     return (
-      <p style={{ padding: '20px', color: '#6b7280' }}>
+      <p className="chart-status">
         No calorie history yet. Add food to start tracking today.
       </p>
     );
@@ -298,26 +293,26 @@ const Linechart = () => {
       series={[
         {
           data: calorieIn,
-          color: "#ff5a5a",
+          color: "#059669",
           label: "Calories Consumed"
         },
         {
           data: calorieBurnt,
-          color: "#2b64d9",
+          color: "#487c5c",
           label: "Calories Burned"
         }
       ]}
-      width={600}
-      height={350}
+      width={560}
+      height={320}
     />
   );
 };
 
-const SubComponent = ({ text, color, tc, value }) => {
+const SubComponent = ({ text, tone, value }) => {
   return (
-    <div className='info-sub' style={{ backgroundColor: color }}>
+    <div className={`info-sub ${tone}`}>
       <p>{text}</p>
-      <p style={{ fontWeight: 'bold', color: tc }}>{value}</p>
+      <p className="info-value">{value}</p>
     </div>
   );
 };
@@ -327,16 +322,16 @@ const GaugeComponent = ({ value, max, unit }) => {
   const safeMax = Number(max) || 0;
   const normalizedValue = safeMax > 0 ? Math.min(safeValue, safeMax) : safeValue;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="gauge-component">
       <Gauge
         width={150}
         height={150}
         value={safeMax > 0 ? (normalizedValue / safeMax) * 100 : 0}
         max={100}
         sx={{
-          '& .MuiGauge-valueArc': { fill: '#72C2E8' },
-          '& .MuiGauge-referenceArc': { fill: '#d3d3d3' },
-          '& .MuiGauge-valueLabel': { fill: '#74b8', fontSize: '24px' },
+          '& .MuiGauge-valueArc': { fill: '#6b9b76' },
+          '& .MuiGauge-referenceArc': { fill: '#e2e8f0' },
+          '& .MuiGauge-valueLabel': { fill: '#172033', fontSize: '22px' },
         }}
       />
       

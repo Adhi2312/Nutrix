@@ -16,7 +16,6 @@ const initialFormData = {
   otp: '',
   gender: '',
   dob: '',
-  location: '',
   height: '',
   weight: '',
   bloodGroup: '',
@@ -79,7 +78,6 @@ export const Signup = () => {
         email: formData.email,
         password: formData.password,
         gender: formData.gender === 'male' ? true : false,
-        country: formData.location,
         dob: formData.dob,
         height: Number(formData.height),
         weight: Number(formData.weight),
@@ -113,10 +111,16 @@ export const Signup = () => {
     <div className="signup-page">
       <aside className="signup-sidebar">
         <div className="brand-pill">
-          <span className="brand-icon">✦</span>
-          <span>Signup</span>
+          <span className="brand-icon">N</span>
+          <span>Nutrix</span>
+        </div>
+        <div className="signup-story-copy">
+          <p className="signup-kicker">A better starting point</p>
+          <h1>Build a routine that fits your life.</h1>
+          <p>Tell us a little about yourself and Nutrix will make the everyday details easier to follow.</p>
         </div>
         <SignupStepper step={step} />
+        <p className="signup-story-footer">Your information stays in your account.</p>
       </aside>
 
       <main className="signup-main">
@@ -141,8 +145,8 @@ export const Signup = () => {
             />
           ) : null}
 
-          <div className="auth-switch">
-            <span>Already have an account?</span>
+          <div className="auth-switch-copy">
+            <span>Already a member?</span>
             <Link to="/login">Login</Link>
           </div>
         </div>

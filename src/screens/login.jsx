@@ -41,17 +41,34 @@ export const Login = () => {
   };
 
   return (
-    <div className='min-h-screen bg-[radial-gradient(circle_at_top,_#ebf5ff,_#ffffff)] flex items-center justify-center px-4 py-10'>
-      <div className='w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_24px_70px_rgba(17,68,133,0.14)]'>
-        <div className='mb-8 text-center'>
-          <div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-semibold text-white'>N</div>
-          <h1 className='text-2xl font-semibold text-slate-800'>Welcome back</h1>
-          <p className='mt-2 text-sm text-slate-500'>Log in to continue your wellness journey.</p>
+    <main className='login-page'>
+      <section className='login-story' aria-label="About Nutrix">
+        <div className="login-brand-lockup"><span className="login-brand-mark">N</span><span>nutrix</span></div>
+        <div className="login-story-copy">
+          <p className="login-kicker">Eat with intention.</p>
+          <h1>A clearer view of your everyday health.</h1>
+          <p>Keep your meals, movement, and progress in one calm place.</p>
         </div>
+        <div className="login-insight" aria-hidden="true">
+          <div className="insight-top"><span>Your daily rhythm</span><strong>steady</strong></div>
+          <div className="insight-bar"><span /></div>
+          <div className="insight-meta"><span>Nutrition</span><span>Movement</span><span>Recovery</span></div>
+        </div>
+        <p className="login-story-footer">A small daily check-in goes a long way.</p>
+      </section>
 
-        <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
-          {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
-          <label className='flex flex-col gap-2 text-sm font-medium text-slate-700'>
+      <section className='login-content'>
+        <div className='login-panel'>
+          <div className='auth-header'>
+            <span className="sr-only">Welcome back</span>
+            <p className="login-panel-kicker">Member sign in</p>
+            <h2>Good to see you.</h2>
+            <p>Pick up where you left off.</p>
+          </div>
+
+          <form className='auth-form' onSubmit={handleSubmit}>
+          {error ? <p role="alert" className="form-error">{error}</p> : null}
+          <label className='form-field'>
             <span>Email</span>
             <input
               value={email}
@@ -59,11 +76,11 @@ export const Login = () => {
               type='email'
               autoComplete='email'
               placeholder='Enter your email'
-              className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white'
+              className='form-control'
             />
           </label>
 
-          <label className='flex flex-col gap-2 text-sm font-medium text-slate-700'>
+          <label className='form-field'>
             <span>Password</span>
             <input
               value={password}
@@ -71,20 +88,21 @@ export const Login = () => {
               type='password'
               autoComplete='current-password'
               placeholder='Enter password'
-              className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white'
+              className='form-control'
             />
           </label>
 
-          <button disabled={submitting} type='submit' className='mt-2 rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700'>
+          <button disabled={submitting} type='submit' className='button-primary auth-submit'>
             {submitting ? 'Logging in...' : 'Login'}
           </button>
-        </form>
+          </form>
 
-        <div className='mt-6 text-center text-sm text-slate-600'>
-          <span>Don&apos;t have an account?</span>{' '}
-          <Link to='/signup' className='font-semibold text-blue-600 hover:underline'>Sign up</Link>
+          <div className='auth-switch-copy'>
+            <span>New to Nutrix?</span>{' '}
+            <Link to='/signup'>Create an account</Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };

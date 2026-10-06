@@ -4,7 +4,7 @@ export const ProfileStep = ({ formData, onFieldChange, onBack, onFinish, error, 
   return (
     <form className="signup-form-card step-transition" onSubmit={onFinish}>
       <div className="step-header">
-        <p className="eyebrow">Step 3</p>
+        <p className="eyebrow">Step 2</p>
         <h2>Complete your profile</h2>
         <p className="step-copy">Add a few details so your account feels ready from day one.</p>
       </div>
@@ -25,15 +25,6 @@ export const ProfileStep = ({ formData, onFieldChange, onBack, onFinish, error, 
           <label className="input-group">
             <span>Date of Birth</span>
             <input type="date" value={formData.dob} onChange={(event) => onFieldChange('dob', event.target.value)} />
-          </label>
-          <label className="input-group full-width">
-            <span>Location</span>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(event) => onFieldChange('location', event.target.value)}
-              placeholder="Enter your location"
-            />
           </label>
         </div>
       </div>

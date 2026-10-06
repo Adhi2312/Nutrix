@@ -34,8 +34,10 @@ const PersonalDetails = ({ userData }) => {
           <h3>Personal Details</h3>
         </div>
         <button
+          type="button"
           onClick={() => setIsVisible(!isVisible)}
           className="toggle-btn"
+          aria-label={isVisible ? "Hide personal details" : "Show personal details"}
           title={isVisible ? "Hide Details" : "Show Details"}
         >
           {isVisible ? <EyeOff className="eye-icon" /> : <Eye className="eye-icon" />}

@@ -112,6 +112,7 @@ const ProtectedLayout = ({ authorized, loading, error, onRetry }) => {
 
 export const NavBar = () => {
   const nav = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
@@ -138,17 +139,20 @@ export const NavBar = () => {
   return (
     <>
     {logoutError ? <p className="logout-error" role="alert">{logoutError}</p> : null}
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4 flex bg-white shadow-lg border border-gray-200 rounded-full p-4 px-8 justify-between gap-14">
-      <button className="nav-button" onClick={() => nav("/")}>
-        <FaHome size={32} />
+    <nav className="app-nav" aria-label="Main navigation">
+      <button aria-label="Dashboard" title="Dashboard" className={`nav-button ${['/', '/dashboard'].includes(location.pathname) ? 'active' : ''}`} onClick={() => nav("/")}>
+        <FaHome size={23} />
+        <span className="nav-label">Home</span>
       </button>
 
-      <button className="nav-button" onClick={() => nav("/plate")}>
-        <FaBowlFood size={32} />
+      <button aria-label="Food" title="Food" className={`nav-button ${location.pathname === '/plate' ? 'active' : ''}`} onClick={() => nav("/plate")}>
+        <FaBowlFood size={23} />
+        <span className="nav-label">Food</span>
       </button>
 
-      <button className="nav-button" onClick={() => nav("/check")}>
-        <FaUser size={32} />
+      <button aria-label="Profile" title="Profile" className={`nav-button ${location.pathname === '/check' ? 'active' : ''}`} onClick={() => nav("/check")}>
+        <FaUser size={22} />
+        <span className="nav-label">Profile</span>
       </button>
 
       <button
@@ -158,9 +162,10 @@ export const NavBar = () => {
         disabled={loggingOut}
         onClick={logout}
       >
-        <FaSignOutAlt size={30} />
+        <FaSignOutAlt size={22} />
+        <span className="nav-label">Log out</span>
       </button>
-    </div>
+    </nav>
     </>
   );
 };

@@ -49,7 +49,7 @@ export const Food = () => {
   };
 
   return (
-    <div>
+    <div className="food-page">
       {selectedDish && (
         <Card
           dish={selectedDish}
@@ -58,57 +58,61 @@ export const Food = () => {
         />
       )}
 
-      <div style={{ display: "flex", height: "100vh", width: "100vw", justifyContent: "center" }}>
-        <div className='food-sub'>
-          <div style={{ display: "flex" }}>
+      <main className='food-sub'>
+          <section className="food-intro" aria-labelledby="food-page-title">
+            <div>
+              <p className="food-intro-kicker">Nutrition</p>
+              <h1 id="food-page-title">Food library</h1>
+            </div>
+            {!loading && <span className="food-total">{filteredDishes.length} available</span>}
+          </section>
+          <label className="food-search">
+            <span className="sr-only">Search foods</span>
+            <CiSearch size={22} aria-hidden="true" />
             <input
               className='in'
-              placeholder='Type Something,...'
+              placeholder='Search foods'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <CiSearch size={30} className='search' />
-          </div>
+          </label>
 
           <div className='food-sub-2'>
-            {error && <p style={{ padding: '12px 20px', color: '#b91c1c' }}>{error}</p>}
+            {error && <p className="food-feedback error" role="alert">{error}</p>}
 
-            {loading && <p style={{ padding: '20px' }}>Loading dishes...</p>}
+            {loading && <p className="food-feedback">Loading foods...</p>}
 
             {!loading && filteredDishes.length === 0 && (
-              <p style={{ padding: '20px' }}>
-                No dishes are available yet.
+              <p className="food-feedback">
+                No foods match your search.
               </p>
             )}
 
             {filteredDishes.map((dish) => (
               <div className='food-card' key={dish._id}>
                 <img
-                  style={{ width: "300px", height: "200px", borderRadius: "20px 20px 0px 0px" }}
+                  className="food-image"
                   src={idli}
                   alt={dish.dish_name}
                 />
-                <div style={{ padding: "10px" }}>
-                  <div style={{ display: 'flex' }}>
+                <div className="food-card-content">
+                  <span className="food-calorie-tag">{dish.calorie} kcal</span>
+                  <div className="food-card-row">
                     <div>
-                      <p style={{ margin: "0px", fontSize: "20px" }}>{dish.dish_name}</p>
-                      <p style={{ margin: "5px 0px 5px 0px", fontSize: "15px", color: "grey" }}>
+                      <h2>{dish.dish_name}</h2>
+                      <p>
                         {dish.calorie} calories per {dish.servingDescription || 'serving'}
                       </p>
                     </div>
-                    <IoIosAddCircleOutline
-                      style={{ marginLeft: "auto" }}
-                      color='grey'
-                      size={40}
-                      onClick={() => setSelectedDish(dish)}
-                    />
+                    <button className="food-add-button" aria-label={`Add ${dish.dish_name}`} onClick={() => setSelectedDish(dish)}>
+                      <IoIosAddCircleOutline size={28} aria-hidden="true" />
+                    </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
+      </main>
     </div>
   )
 }
@@ -117,6 +121,14 @@ export const Card = ({ dish, onClose, onAdded }) => {
   const [count, setCount] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
 
   const handle = async () => {
     const body = { foodId: dish._id, quantity: count, date: localDate() };
@@ -141,48 +153,33 @@ export const Card = ({ dish, onClose, onAdded }) => {
   }
 
   return (
-    <div className='food-card2'>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', width: "100%", backgroundColor: "white", padding: "7px 0px" }}>
-        <RxCross1 style={{ marginRight: '10px' }} size={20} onClick={onClose} />
+    <div className="food-modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <section className='food-card2' role="dialog" aria-modal="true" aria-labelledby="food-dialog-title">
+      <div className="food-modal-header">
+        <div><p className="page-eyebrow">Add to today</p><h2 id="food-dialog-title">{dish.dish_name}</h2></div>
+        <button className="icon-button" aria-label="Close" onClick={onClose}><RxCross1 size={19} /></button>
       </div>
-      <div style={{ width: "100%", display: "flex", height: "100%", backgroundColor: "white" }}>
-        <div className="ccc" style={{ display: 'flex', flexDirection: 'column', width: "50%" }}>
-          <h3>Dish Name</h3>
-          <p>Serving</p>
-          <p>Protein</p>
-          <p>Carbs</p>
-          <p>Fats</p>
-          <p>Calorie</p>
-          <p>Qty</p>
-          <button
-            style={{ maxWidth: "100px", padding: '10px 30px', margin: "10px", borderRadius: "10px", border: '0px' }}
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-        </div>
-        <div className='ccc' style={{ width: '50%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <h3>{dish.dish_name}</h3>
-          <p>{dish.servingDescription || '1 serving'}</p>
-          <p>{dish.protein} g</p>
-          <p>{dish.carbs} g</p>
-          <p>{dish.fat} g</p>
-          <p>{dish.calorie} kcal</p>
-          <div className='add-b'>
-            <button onClick={() => { (count <= 1) ? setCount(1) : setCount(count - 1) }}><FiMinus size={7} /></button>
-            <p>{count}</p>
-            <button onClick={() => { setCount(count + 1) }}><FaPlus size={7} /></button>
-          </div>
-          <button
-            onClick={handle}
-            disabled={saving}
-            style={{ minWidth: "100px", padding: '10px 30px', margin: "10px", borderRadius: "10px", border: '0px' }}
-          >
-            {saving ? 'Adding...' : 'Add'}
-          </button>
-          {error && <p style={{ color: '#b91c1c', margin: '0 10px' }}>{error}</p>}
+      <dl className="nutrition-list">
+        <div><dt>Serving</dt><dd>{dish.servingDescription || '1 serving'}</dd></div>
+        <div><dt>Protein</dt><dd>{dish.protein} g</dd></div>
+        <div><dt>Carbs</dt><dd>{dish.carbs} g</dd></div>
+        <div><dt>Fats</dt><dd>{dish.fat} g</dd></div>
+        <div><dt>Calories</dt><dd>{dish.calorie} kcal</dd></div>
+      </dl>
+      <div className="quantity-row">
+        <span>Quantity</span>
+        <div className='add-b'>
+          <button aria-label="Decrease quantity" onClick={() => setCount(Math.max(1, count - 1))}><FiMinus /></button>
+          <span>{count}</span>
+          <button aria-label="Increase quantity" onClick={() => setCount(count + 1)}><FaPlus /></button>
         </div>
       </div>
+      {error && <p className="food-feedback error" role="alert">{error}</p>}
+      <div className="food-modal-actions">
+        <button className="secondary-button" onClick={onClose}>Cancel</button>
+        <button className="button-primary" onClick={handle} disabled={saving}>{saving ? 'Adding...' : 'Add food'}</button>
+      </div>
+    </section>
     </div>
   )
 }
