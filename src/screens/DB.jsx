@@ -142,14 +142,9 @@ const DB = ({ data }) => {
                 )}
                 <SubComponent text={"Calorie burnt"} color={'#eef7ff'} tc={'#2b64d9'} value={caloriesBurned} />
                 {healthUnavailable && (
-                  <div>
-                    <p style={{ margin: '8px 0 0', color: '#6b7280', fontSize: '12px' }}>
-                      Health data is temporarily unavailable.
-                    </p>
-                    <button type="button" className="connect-fitbit-btn" onClick={() => window.location.reload()}>
-                      Retry health connection
-                    </button>
-                  </div>
+                  <p className="health-data-status" role="status">
+                    Health data is temporarily unavailable.
+                  </p>
                 )}
               </div>
             </div>

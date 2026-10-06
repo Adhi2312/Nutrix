@@ -19,20 +19,16 @@ h1{
 }
 .sub-main
 {
-  /* padding: 20px; */
-  /* background-color: black; */
-  /* min-height: 86%; */
- 
+  min-height: 100dvh;
+  padding-bottom: 7rem;
+  box-sizing: border-box;
 }
 .main
 {
   display: flex;
   flex-direction: column;
-  /* background-color: bisque; */
-  height: 100vh;
+  min-height: 100dvh;
   background-color: #e5e5e5;
-  /* padding: auto; */
-
 }
 .nav
 {
