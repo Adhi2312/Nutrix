@@ -50,15 +50,6 @@ export const ProfileStep = ({ formData, onFieldChange, onBack, onFinish, error, 
               placeholder="Enter weight"
             />
           </label>
-          <label className="input-group full-width">
-            <span>Blood Group</span>
-            <input
-              type="text"
-              value={formData.bloodGroup}
-              onChange={(event) => onFieldChange('bloodGroup', event.target.value)}
-              placeholder="e.g. O+"
-            />
-          </label>
         </div>
       </div>
 

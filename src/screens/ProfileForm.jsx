@@ -15,9 +15,7 @@ const ProfileForm = () => {
   const [error, setError] = useState(null);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [mobileno, setMobileno] = useState("");
   const [dob, setDob] = useState("");
-  const [bloodGroup, setBloodGroup] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
 
@@ -29,9 +27,7 @@ const ProfileForm = () => {
         const data = await res.json();
         setDisplayName(data.displayName || data.username || "");
         setEmail(data.email || "");
-        setMobileno(data.mobileno || "");
         setDob(data.dob ? String(data.dob).slice(0, 10) : "");
-        setBloodGroup(data.bloodGroup || "");
         setHeight(data.height || "");
         setWeight(data.weight || "");
       } catch (err) {
@@ -50,7 +46,7 @@ const ProfileForm = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ displayName, email, mobileno, dob, bloodGroup, height, weight }),
+        body: JSON.stringify({ displayName, email, dob, height, weight }),
       });
       if (response.ok) {
         setIsEditing(false);
@@ -101,9 +97,7 @@ const ProfileForm = () => {
           <div className="profile-grid">
             {renderField("displayName", "Name", displayName, setDisplayName)}
             {renderField("email", "Email address", email, setEmail, "email")}
-            {renderField("mobileno", "Phone number", mobileno, setMobileno, "tel")}
             {renderField("dob", "Date of birth", dob, setDob, "date")}
-            {renderField("bloodGroup", "Blood group", bloodGroup, setBloodGroup)}
             {renderField("height", "Height", height, setHeight, "number", " cm")}
             {renderField("weight", "Weight", weight, setWeight, "number", " kg")}
           </div>

@@ -18,7 +18,6 @@ const initialFormData = {
   dob: '',
   height: '',
   weight: '',
-  bloodGroup: '',
 };
 
 export const Signup = () => {
@@ -81,7 +80,6 @@ export const Signup = () => {
         dob: formData.dob,
         height: Number(formData.height),
         weight: Number(formData.weight),
-        bloodGroup: formData.bloodGroup,
       };
 
       const response = await fetch(apiUrl('/signup'), {
